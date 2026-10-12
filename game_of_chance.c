@@ -39,6 +39,7 @@ struct user player; // Структура с данными игрока
 int main()
 {
     int choice, last_game;
+
     srand(time(0)); // Начальное значение генератора
     // случайных чисел определяются текущим временем.
 
@@ -47,6 +48,36 @@ int main()
         // зарегистрировать нового игрока.
     }
 
+    while(choice != 7) {
+        printf("-=[ Game of Chance Menu ]=-\n");
+        printf("1 - Play the Pick a Number game\n");
+        printf("2 - Play the No Match Dealer game\n");
+        printf("3 - Play the Find the Ace game\n");
+        printf("4 - View current high score\n");
+        printf("5 - Change your user name\n");
+        printf("6 - Reset your account at 100 credits\n");
+        printf("7 - Quit\n");
+        printf("[Name: %s]\n", player.name);
+        printf("[You have %u credits] -> ", player.credits);
+
+        scanf("%d", choice);
+
+        if ((choice < 1) || (choice > 7)) {
+            printf("\n[!!] The number %d is an invalid selection.\n\n", choice);
+        } else if (choice < 4) {
+            if (choice != last_game) {
+                if (choice == 1) {
+                    player.current_game = pick_a_number;
+                } else if (choice == 2) {
+                    player.current_game = dealer_no_match;
+                } else {
+                    player.current_game = find_the_ace;
+                }
+                last_game = choice;
+            }
+            play_the_game();
+        }
+    }
 }
 
 // ############################################################
