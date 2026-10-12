@@ -64,20 +64,33 @@ int main()
 
         if ((choice < 1) || (choice > 7)) {
             printf("\n[!!] The number %d is an invalid selection.\n\n", choice);
-        } else if (choice < 4) {
-            if (choice != last_game) {
-                if (choice == 1) {
+        } else if (choice < 4) { // Если была выбрана та или иная игра.
+            if (choice != last_game) { // Если указатель на функцию не
+                                       // определен,
+                if (choice == 1) { // задать указатель на выбранную игру
                     player.current_game = pick_a_number;
                 } else if (choice == 2) {
                     player.current_game = dealer_no_match;
                 } else {
                     player.current_game = find_the_ace;
                 }
-                last_game = choice;
+                last_game = choice; // и запомнить последнюю выбранную игру.
             }
-            play_the_game();
+            play_the_game(); // Сыграть в игру.
+        } else if (choice == 4) {
+            show_highscore();
+        } else if (choice == 5) {
+            printf("\nChange user name\n");
+            printf("Enter your new name: ");
+            input_name();
+            printf("Your name has been changed.\n\n");
+        } else if (choice == 6) {
+            printf("\nYour account has been reset with 100 credits.\n\n");
+            player.credits = 100;
         }
     }
+    update_player_data();
+    printf("\nThanks for playing! Bye.\n");
 }
 
 // ############################################################
