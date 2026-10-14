@@ -129,8 +129,56 @@ int get_player_data()
     }
 }
 // ------------------------------------------------------------
+// Функция регистрации нового пользователя.
+// Создает учетную запись для нового игрока и дописывает ее в файл.
+void register_new_player()
+{
+    int fd;
+
+    printf("-=-={ New Player Registration }=-=-\n");
+    printf("Enter your name: ");
+
+    input_name();
+
+    player.uid = getuid();
+    player.highscore = player.credits = 100;
+
+    fd = open(DATAFILE, O_WRONLY|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
+
+    if (fd == -1) {
+        fatal("in register_new_player() while opening file");
+    }
+
+    write(fd, &player, sizeof(struct user));
+
+    close(fd);
+
+    printf("\nWelcom to the Game of Chance %s.\n", player.name);
+    printf("You have been given %u credits.\n", player.credits);
+}
 // ------------------------------------------------------------
-//
+// Эта функция записывает в файл сведения о текущем игроке.
+// В основном служит для обновления результатов после завершения игры.
+void update_player_data()
+{
+    int fd, i, read_uid;
+    char burned_byte;
+
+    fd = open(DATAFILE, O_RDWR);
+
+    if (fd == -1) { // Если не удалось открыть файл, есть серьезные проблемы.
+        fatal("in update_player_data() while opening file");
+    }
+
+    read(fd, &read_uid, 4); // Прочитать UID из первой структуры.
+
+    while(read_uid != player.uid) { // Повторять, пока не отыщется нужный uid.
+        for(i=0; i < sizeof(struct user) - 4; i++) { // Прочитать остаток
+            read(fd, &burned_byte, 1); // структуры
+        }
+        read(fd, &read_uid, 4); // Прочитать uid из следующей структуры.
+    }
+}
 // ------------------------------------------------------------
 // ------------------------------------------------------------
 //
