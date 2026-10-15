@@ -178,13 +178,78 @@ void update_player_data()
         }
         read(fd, &read_uid, 4); // Прочитать uid из следующей структуры.
     }
+
+    write(fd, &(player.credits), 4); // Обновить результаты.
+    write(fd, &(player.highscore), 4); // Обновить лучший результат.
+    write(fd, &(player.name), 100); // Обновить имя.
+    close(fd);
 }
 // ------------------------------------------------------------
+// Эта функция выводит текущий лучший результат
+//и имя лучшего игрока.
+void show_highscore()
+{
+    unsigned int top_score = 0;
+    char top_name[100];
+    struct user entry;
+    int fd;
+
+    printf("\n====================| HIGH SCORE |====================\n");
+
+    fd = open(DATAFILE, O_RDONLY);
+
+    if (fd == -1) {
+        fatal("in show_highscore() while opening file");
+    }
+    while(read(fd, &entry, sizeof(struct user)) > 0) { // Повторять, пока
+                                                       // не закончится файл.
+        if (entry.highscore > top_score) { // Если есть лучший результат,
+            top_score = entry.highscore; // записать его в top_score
+            strcpy(top_name, entry.name); // и имя пользователя в top_name.
+        }
+    }
+
+    close(fd);
+
+    if (top_score > player.highscore) {
+        printf("%s has the high score of %u\n", top_name, top_score);
+    } else {
+        printf("You currently have the high score of %u credits!\n", player.highscore);
+    }
+
+    printf("=======================================================\n\n");
+
+}
 // ------------------------------------------------------------
-//
+// Эта функция присуждает джекпот для игры Pick a Number (выбери число).
+void jackpot()
+{
+    printf("*+*+*+*+*+* JACKPOT *+*+*+*+*+*\n");
+    printf("You have won the jackpot of 100 credits!\n");
+    player.credits += 100;
+}
 // ------------------------------------------------------------
+// Эта функция вводит имя игрока, поскольку
+// scanf("%s", &whaterver) прекратит ввод на первом пробеле.
+void input_name()
+{
+    char *name_ptr, input_char='\n';
+
+    while(input_char == '\n') { // Сбросить оставшиеся
+        scanf("%c", &input_char); // символы перевода строки.
+    }
+
+    name_ptr = (char *) &(player.name); // name_ptr = адрес имени игрока.
+    while(input_char != '\n') { // Повторять до перевода строки.
+        *name_ptr = input_char; // Пометить введенный символ в поле name.
+        scanf("%c", &input_char); // Получить следующий символ.
+        name_ptr++; // Увеличить указатель.
+    }
+    *name_ptr = 0; // Завершить строку.
+}
 // ------------------------------------------------------------
-//
+// Эта функция выводит три карты в игре Find the Ace.
+// Она принимает сообщение, которое нужно вывести,
 // ------------------------------------------------------------
 // ------------------------------------------------------------
 //
