@@ -103,7 +103,7 @@ int get_player_data()
     int fd, uid, read_bytes;
     struct user entry;
 
-    uid = getuid();
+  uid = getuid();
     fd = open(DATAFILE, O_RDONLY);
 
     if (fd == -1) { // Не получается открыть файл; возможно он не существует.
@@ -249,8 +249,54 @@ void input_name()
 }
 // ------------------------------------------------------------
 // Эта функция выводит три карты в игре Find the Ace.
-// Она принимает сообщение, которое нужно вывести,
+// Она принимает сообщение, которое нужно вывести, указатель на масив карт
+// и карту, которую пользователь выбрал для ввода.
+// Если user_pick равен -1, отображаются номера выбора.
+void print_cards(char *message, char *cards, int user_pick)
+{
+    int i;
+
+    printf("\n\t*** %s ***\n", message);
+    printf(" \t._.\t._.\t._.\n");
+    printf("Cards:\t|%c|\t|%c|\t|%c|\n\t", cards[0], cards[1], cards[2]);
+
+    if (user_pick == -1) {
+        printf(" 1 \t 2 \t 3\n");
+    } else {
+        for (i=0; i < user_pick; i++) {
+            printf("\t");
+        }
+        printf(" ^-- your pick\n");
+    }
+}
 // ------------------------------------------------------------
+// Эта функция вводит ставки для игр No Match Dealer
+// и Find the Ace. Она принимает в качестве аргументов имеющиеся
+// очки и предыдущую ставку. prevision_wager имеет значение только
+// второй ставки в игре Find the Ace.
+// Функция возвращает -1,  если ставка слишком велика или слишком мала,
+// и размер ставки в противном случае.
+int take_wager(int available_credits, int previous_wager)
+{
+    int wager, total_wager;
+
+    printf("How many of your %d credits would you like to wager? ", available_credits);
+
+    scanf("%d", &wager);
+
+    if (wager < 1) { // Проверить что ставка больше 0.
+        printf("Nice try, but you must wager a positive number!\n");
+        return -1;
+    }
+
+    total_wager = previous_wager + wager;
+    if (total_wager > available_credits) {
+        printf("Your total wager of %d is more than you have!\n", total_wager);
+        printf("You only have %d available_credits, try again.\n", available_credits);
+        return -1;
+    }
+    return -1;
+}
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------
