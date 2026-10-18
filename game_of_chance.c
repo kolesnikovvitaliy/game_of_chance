@@ -332,6 +332,37 @@ void play_the_game()
     }
 }
 // ------------------------------------------------------------
+// Эта функция реализует игру PIck a Number.
+// Она возвращает -1, если у игрока недостачно очков.
+int pick_a_number()
+{
+    int pick, winning_number;
+    printf("\n####### Pick a Number ######\n");
+    printf("This game costs 10 credits to play. Simply pick a number\n");
+    printf("between 1 and 20, and if you pick the winning number, you\n");
+    printf("will win the jackpot of 100 credits!\n\n");
+
+    winning_number = (rand() % 20) + 1; // Выбрать число от 1 до 20.
+    if (player.credits < 10) {
+        printf("You only have %d credits. That's not enough to play!\n\n", player.credits);
+        return -1; // Недостаточно очков для игры
+    }
+
+    player.credits -= 10; // Вычесть 10 очков.
+
+    printf("10 credits have been deducted from your account.\n");
+    printf("Pick a number between 1 and 20: ");
+
+    scanf("%d", &pick);
+    printf("The winning number is %d\n", winning_number);
+
+    if (pick == winning_number) {
+        jackpot();
+    } else {
+        printf("Sorry, you didn't win.\n");
+        return 0;
+    }
+}
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------
