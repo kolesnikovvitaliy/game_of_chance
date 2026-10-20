@@ -7,38 +7,37 @@
 #include <time.h>
 #include <unistd.h>
 
-#define DATAFILE                                                               \
-  "../var/chance.data" // Файл для хранения
-                      // пользовательских данных
-
-// Специальная структура user хранит сведения о пользователях
-
-struct user {
-  int uid;
-  int credits;
-  int highscore;
-  char name[100];
-  int (*current_game)();
-};
-
-// Прототипы функций
-int get_player_data();
-void register_new_player();
-void update_player_data();
-void show_highscore();
-void jackpot();
-void input_name();
-void print_cards(char *, char *, int);
-int take_wager(int, int);
-void play_the_game();
-int pick_a_number();
-int dealer_no_match();
-int find_the_ace();
-
+//#define DATAFILE "../var/chance.data" // Файл для хранения
+//// пользовательских данных
+//
+//// Специальная структура user хранит сведения о пользователях
+//
+// struct user {
+//  int uid;
+//  int credits;
+//  int highscore;
+//  char name[100];
+//  int (*current_game)();
+//};
+//
+//// Прототипы функций
+// int get_player_data();
+// void register_new_player();
+// void update_player_data();
+// void show_highscore();
+// void jackpot();
+// void input_name();
+// void print_cards(char *, char *, int);
+// int take_wager(int, int);
+// void play_the_game();
+// int pick_a_number();
+// int dealer_no_match();
+// int find_the_ace();
+//
 // Глобальные переменные
 struct user player; // Структура с данными игрока
 // ############################################################
-int main() {
+int game_of_chance() {
   int choice, last_game;
 
   srand(time(0)); // Начальное значение генератора
@@ -359,34 +358,30 @@ int pick_a_number() {
 // ------------------------------------------------------------
 // Это игра No Match Dealer.
 // Она возвращает -1, если у игрока 0 очков.
-int dealer_no_match()
-{
-    int i, j, numbers[16], wager = -1, match = -1;
+int dealer_no_match() {
+  int i, j, numbers[16], wager = -1, match = -1;
 
-    printf("\n::::::: No Match Dealer :::::::\n");
-    printf("In this game, you can wager up to all of your credits.\n");
-    printf("The dealer will deal out 16 random numbers between 0 and 99.\n");
-    printf("If there are no matches among them, you double yuor money!\n\n");
+  printf("\n::::::: No Match Dealer :::::::\n");
+  printf("In this game, you can wager up to all of your credits.\n");
+  printf("The dealer will deal out 16 random numbers between 0 and 99.\n");
+  printf("If there are no matches among them, you double yuor money!\n\n");
 
-    if (player.credits == 0) {
-        printf("You don't have any credits to wager!\n\n");
-        return -1;
+  if (player.credits == 0) {
+    printf("You don't have any credits to wager!\n\n");
+    return -1;
+  }
+
+  while (wager == -1) {
+    wager = take_wager(player.credits, 0);
+    printf("\t\t::: Dealing out 16 random numbers :::\n");
+    for (i = 0; i < 16; i++) {
+      numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
+      printf("%2d\t", numbers[i]);
+      if (i % 8 == 7) { // С новой строки через каждые 8 чисел.
+        printf("\n");
+      }
     }
-
-    while(wager == -1) {
-        wager = take_wager(player.credits, 0);
-        printf("\t\t::: Dealing out 16 random numbers :::\n");
-        for(i=0; i < 16; i++) {
-            numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
-            printf("%2d\t", numbers[i]);
-            if (i%8 == 7) { // С новой строки через каждые 8 чисел.
-                printf("\n");
-            }
-        }
-    }
-
-
-
+  }
 }
 // ------------------------------------------------------------
 // ------------------------------------------------------------
