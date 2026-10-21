@@ -7,33 +7,7 @@
 #include <time.h>
 #include <unistd.h>
 
-//#define DATAFILE "../var/chance.data" // Файл для хранения
-//// пользовательских данных
-//
-//// Специальная структура user хранит сведения о пользователях
-//
-// struct user {
-//  int uid;
-//  int credits;
-//  int highscore;
-//  char name[100];
-//  int (*current_game)();
-//};
-//
-//// Прототипы функций
-// int get_player_data();
-// void register_new_player();
-// void update_player_data();
-// void show_highscore();
-// void jackpot();
-// void input_name();
-// void print_cards(char *, char *, int);
-// int take_wager(int, int);
-// void play_the_game();
-// int pick_a_number();
-// int dealer_no_match();
-// int find_the_ace();
-//
+
 // Глобальные переменные
 struct user player; // Структура с данными игрока
 // ############################################################
@@ -374,16 +348,53 @@ int dealer_no_match() {
   while (wager == -1) {
     wager = take_wager(player.credits, 0);
     printf("\t\t::: Dealing out 16 random numbers :::\n");
-    for (i = 0; i < 16; i++) {
+  }
+
+  for (i = 0; i < 16; i++) {
       numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
       printf("%2d\t", numbers[i]);
       if (i % 8 == 7) { // С новой строки через каждые 8 чисел.
         printf("\n");
       }
-    }
   }
+
+  for (i=0; i < 15; i++) {
+      j = i + 1;
+      while (j < 16) {
+          if(numbers[i] == numbers[j]) {
+              match = numbers[i];
+          }
+          j++;
+      }
+  }
+
+  if (match != -1) {
+      printf("The dealer matched the number %d!\n", match);
+      printf("You lose %d credits.\n", wager);
+      player.credits -= wager;
+  } else {
+      printf("There were no matches! You win %d credits!\n", wager);
+      player.credits += wager;
+  }
+  return 0;
+
 }
 // ------------------------------------------------------------
+// Это игра Find the Ace.
+// Она возвращает -1, если у игрока 0 очков.
+int find_the_ace() {
+    int i, ace, total_wager;
+    int invalid_choice, pick = -1, wager_one = -1, wager_two = -1;
+    char chpice_two, cards[3] = {'X', 'X', 'X'};
+
+    ace = rand()%3; // Выбрать для туза случайную позицию.
+    printf("******* Fing the Ace *******\n");
+    printf("In this game, you can wager up to all of your credits.\n");
+    printf("Three cards will be dealt out, two queens and one ace.\n");
+    printf("If you find the ace, you will win uoyr wager.\n");
+    printf("After choosing a card, one of the queens will be revealed.\n");
+    printf("At ");
+}
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------

@@ -1,5 +1,4 @@
-#include "my_lib.h"
-
+extern int game_of_chance();
 // Запуск игры.
 // ########################
 int main() {

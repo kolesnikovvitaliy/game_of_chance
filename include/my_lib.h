@@ -1,10 +1,10 @@
+#ifndef GAME_H
+#define GAME_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-int game_of_chance();
-
-#define DATAFILE "../var/chance.data" // Файл для хранения
+#define DATAFILE "./var/chance.data" // Файл для хранения
 // пользовательских данных
 
 // Специальная структура user хранит сведения о пользователях
@@ -18,6 +18,7 @@ struct user {
 };
 
 // Прототипы функций
+int game_of_chance();
 int get_player_data();
 void register_new_player();
 void update_player_data();
@@ -51,3 +52,5 @@ void *ec_malloc(unsigned int size) {
   }
   return ptr;
 }
+#endif
+#pragma once
