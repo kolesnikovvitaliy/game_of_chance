@@ -255,7 +255,7 @@ int take_wager(int available_credits, int previous_wager) {
     return -1;
   }
 
-  total_wager = previous_wager + wager;
+ total_wager = previous_wager + wager;
   if (total_wager > available_credits) {
     printf("Your total wager of %d is more than you have!\n", total_wager);
     printf("You only have %d available_credits, try again.\n",
@@ -393,7 +393,41 @@ int find_the_ace() {
     printf("Three cards will be dealt out, two queens and one ace.\n");
     printf("If you find the ace, you will win uoyr wager.\n");
     printf("After choosing a card, one of the queens will be revealed.\n");
-    printf("At ");
+    printf("At this piont, you may either select a different card or\n");
+    printf("increase your wager.\n\n");
+
+    if(player.credits == 0) {
+        printf("You don't have any credits to wager");
+        return -1;
+    }
+
+    while(wager_one == -1) { // Выполнить цикл пока не будет
+                             // сделана допустимая ставка.
+        wager_one = take_wager(player.credits, 0);
+    }
+
+    print_cards("Dealing cards", cards, -1);
+    pick = -1;
+    while((pick < 1) || (pick > 3)) {
+        printf("Select a card: 1, 2 or 3");
+        scanf("%d", &pick);
+    }
+
+    pick--; // Корркстировать выбор, потому что нумерация карт начинается с 0.
+    i=0;
+    while((i == ace) || (i == pick)) { // Выполнять цикл, пока
+        i++; // не будет найдена дама для открытия.
+    }
+
+    cards[i] = 'Q';
+    print_cards("Revealing a queen", cards, pick);
+
+    invalid_choice = 1;
+    while(invalid_choice) { // Выполнять цикл, пока не будет сделан
+                            // допустимый выбор.
+        printf("Would you like to:\n[c]hange your pick\tor\t[i]ncrease you wager?\n");
+    }
+
 }
 // ------------------------------------------------------------
 //
