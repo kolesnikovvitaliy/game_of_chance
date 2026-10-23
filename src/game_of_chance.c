@@ -385,7 +385,7 @@ int dealer_no_match() {
 int find_the_ace() {
     int i, ace, total_wager;
     int invalid_choice, pick = -1, wager_one = -1, wager_two = -1;
-    char chpice_two, cards[3] = {'X', 'X', 'X'};
+    char choice_two, cards[3] = {'X', 'X', 'X'};
 
     ace = rand()%3; // Выбрать для туза случайную позицию.
     printf("******* Fing the Ace *******\n");
@@ -426,6 +426,38 @@ int find_the_ace() {
     while(invalid_choice) { // Выполнять цикл, пока не будет сделан
                             // допустимый выбор.
         printf("Would you like to:\n[c]hange your pick\tor\t[i]ncrease you wager?\n");
+        printf("Select c or i: ");
+
+        choice_two = '\n';
+        while(choice_two == '\n') { // Сбросить лишние переводы строки.
+            scanf("%c", &choice_two);
+        }
+
+        if(choice_two == 'i') {  // Уыеличить ставку.
+            invalid_choice=0;  // Это допустимый выбор.
+            while(wager_two == -1){ // Повторять пока не сделана
+                // вторая допустимая ставка
+                wager_two = take_wager(player.credits, wager_one);
+            }
+        }
+
+        if(choice_two == 'c') { // Изменить выбранную карту.
+            i = invalid_choice = 0; // Допустимый выбор.
+            while((i == pick) || (cards[i] == 'Q')) {  // Повторять в цикле,
+                // Пока не найдена другая карта
+                i++;
+            }
+            pick = i; // А затем изменить выбор.
+            printf("Your card pick has been changed to card %d\n", pick+1);
+        }
+    }
+
+    for(i=0; i < 3; i++) { // Раскрыть все карты.
+        if(ace == i) {
+            cards[i] = 'A';
+        } else {
+            cards[i] = 'Q';
+        }
     }
 
 }
