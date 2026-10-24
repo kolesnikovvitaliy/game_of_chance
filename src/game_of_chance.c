@@ -7,7 +7,6 @@
 #include <time.h>
 #include <unistd.h>
 
-
 // Глобальные переменные
 struct user player; // Структура с данными игрока
 // ############################################################
@@ -34,7 +33,7 @@ int game_of_chance() {
     printf("[Name: %s]\n", player.name);
     printf("[You have %u credits] -> ", player.credits);
 
-    scanf("%d", choice);
+    scanf("%d", &choice);
 
     if ((choice < 1) || (choice > 7)) {
       printf("\n[!!] The number %d is an invalid selection.\n\n", choice);
@@ -255,7 +254,7 @@ int take_wager(int available_credits, int previous_wager) {
     return -1;
   }
 
- total_wager = previous_wager + wager;
+  total_wager = previous_wager + wager;
   if (total_wager > available_credits) {
     printf("Your total wager of %d is more than you have!\n", total_wager);
     printf("You only have %d available_credits, try again.\n",
@@ -351,115 +350,136 @@ int dealer_no_match() {
   }
 
   for (i = 0; i < 16; i++) {
-      numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
-      printf("%2d\t", numbers[i]);
-      if (i % 8 == 7) { // С новой строки через каждые 8 чисел.
-        printf("\n");
-      }
+    numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
+    printf("%2d\t", numbers[i]);
+    if (i % 8 == 7) { // С новой строки через каждые 8 чисел.
+      printf("\n");
+    }
   }
 
-  for (i=0; i < 15; i++) {
-      j = i + 1;
-      while (j < 16) {
-          if(numbers[i] == numbers[j]) {
-              match = numbers[i];
-          }
-          j++;
+  for (i = 0; i < 15; i++) {
+    j = i + 1;
+    while (j < 16) {
+      if (numbers[i] == numbers[j]) {
+        match = numbers[i];
       }
+      j++;
+    }
   }
 
   if (match != -1) {
-      printf("The dealer matched the number %d!\n", match);
-      printf("You lose %d credits.\n", wager);
-      player.credits -= wager;
+    printf("The dealer matched the number %d!\n", match);
+    printf("You lose %d credits.\n", wager);
+    player.credits -= wager;
   } else {
-      printf("There were no matches! You win %d credits!\n", wager);
-      player.credits += wager;
+    printf("There were no matches! You win %d credits!\n", wager);
+    player.credits += wager;
   }
   return 0;
-
 }
 // ------------------------------------------------------------
 // Это игра Find the Ace.
 // Она возвращает -1, если у игрока 0 очков.
 int find_the_ace() {
-    int i, ace, total_wager;
-    int invalid_choice, pick = -1, wager_one = -1, wager_two = -1;
-    char choice_two, cards[3] = {'X', 'X', 'X'};
+  int i, ace, total_wager;
+  int invalid_choice, pick = -1, wager_one = -1, wager_two = -1;
+  char choice_two, cards[3] = {'X', 'X', 'X'};
 
-    ace = rand()%3; // Выбрать для туза случайную позицию.
-    printf("******* Fing the Ace *******\n");
-    printf("In this game, you can wager up to all of your credits.\n");
-    printf("Three cards will be dealt out, two queens and one ace.\n");
-    printf("If you find the ace, you will win uoyr wager.\n");
-    printf("After choosing a card, one of the queens will be revealed.\n");
-    printf("At this piont, you may either select a different card or\n");
-    printf("increase your wager.\n\n");
+  ace = rand() % 3; // Выбрать для туза случайную позицию.
+  printf("******* Fing the Ace *******\n");
+  printf("In this game, you can wager up to all of your credits.\n");
+  printf("Three cards will be dealt out, two queens and one ace.\n");
+  printf("If you find the ace, you will win uoyr wager.\n");
+  printf("After choosing a card, one of the queens will be revealed.\n");
+  printf("At this piont, you may either select a different card or\n");
+  printf("increase your wager.\n\n");
 
-    if(player.credits == 0) {
-        printf("You don't have any credits to wager");
-        return -1;
+  if (player.credits == 0) {
+    printf("You don't have any credits to wager");
+    return -1;
+  }
+
+  while (wager_one == -1) { // Выполнить цикл пока не будет
+                            // сделана допустимая ставка.
+    wager_one = take_wager(player.credits, 0);
+  }
+
+  print_cards("Dealing cards", cards, -1);
+  pick = -1;
+  while ((pick < 1) || (pick > 3)) {
+    printf("Select a card: 1, 2 or 3");
+    scanf("%d", &pick);
+  }
+
+  pick--; // Корркстировать выбор, потому что нумерация карт начинается с 0.
+  i = 0;
+  while ((i == ace) || (i == pick)) { // Выполнять цикл, пока
+    i++; // не будет найдена дама для открытия.
+  }
+
+  cards[i] = 'Q';
+  print_cards("Revealing a queen", cards, pick);
+
+  invalid_choice = 1;
+  while (invalid_choice) { // Выполнять цикл, пока не будет сделан
+                           // допустимый выбор.
+    printf(
+        "Would you like to:\n[c]hange your pick\tor\t[i]ncrease you wager?\n");
+    printf("Select c or i: ");
+
+    choice_two = '\n';
+    while (choice_two == '\n') { // Сбросить лишние переводы строки.
+      scanf("%c", &choice_two);
     }
 
-    while(wager_one == -1) { // Выполнить цикл пока не будет
-                             // сделана допустимая ставка.
-        wager_one = take_wager(player.credits, 0);
+    if (choice_two == 'i') {    // УвGеличить ставку.
+      invalid_choice = 0;       // Это допустимый выбор.
+      while (wager_two == -1) { // Повторять пока не сделана
+        // вторая допустимая ставка
+        wager_two = take_wager(player.credits, wager_one);
+      }
     }
 
-    print_cards("Dealing cards", cards, -1);
-    pick = -1;
-    while((pick < 1) || (pick > 3)) {
-        printf("Select a card: 1, 2 or 3");
-        scanf("%d", &pick);
+    if (choice_two == 'c') {  // Изменить выбранную карту.
+      i = invalid_choice = 0; // Допустимый выбор.
+      while ((i == pick) || (cards[i] == 'Q')) { // Повторять в цикле,
+        // Пока не найдена другая карта
+        i++;
+      }
+      pick = i; // А затем изменить выбор.
+      printf("Your card pick has been changed to card %d\n", pick + 1);
     }
+  }
 
-    pick--; // Корркстировать выбор, потому что нумерация карт начинается с 0.
-    i=0;
-    while((i == ace) || (i == pick)) { // Выполнять цикл, пока
-        i++; // не будет найдена дама для открытия.
+  for (i = 0; i < 3; i++) { // Раскрыть все карты.
+    if (ace == i) {
+      cards[i] = 'A';
+    } else {
+      cards[i] = 'Q';
     }
+  }
 
-    cards[i] = 'Q';
-    print_cards("Revealing a queen", cards, pick);
+  print_cards("End result", cards, pick);
 
-    invalid_choice = 1;
-    while(invalid_choice) { // Выполнять цикл, пока не будет сделан
-                            // допустимый выбор.
-        printf("Would you like to:\n[c]hange your pick\tor\t[i]ncrease you wager?\n");
-        printf("Select c or i: ");
+  if (pick == ace) { // Обработка выигрыша.
+    printf("You have won %d credits from your first wager\n", wager_one);
+    player.credits += wager_one;
+  }
 
-        choice_two = '\n';
-        while(choice_two == '\n') { // Сбросить лишние переводы строки.
-            scanf("%c", &choice_two);
-        }
+  if (wager_two != -1) {
+    printf("and an additional %d credits from your second wager!\n", wager_two);
+    player.credits += wager_two;
+  } else { // Обработка проигрыша.
+    printf("You have lost %d credits from your first wager\n, wager_one");
+    player.credits -= wager_one;
 
-        if(choice_two == 'i') {  // Уыеличить ставку.
-            invalid_choice=0;  // Это допустимый выбор.
-            while(wager_two == -1){ // Повторять пока не сделана
-                // вторая допустимая ставка
-                wager_two = take_wager(player.credits, wager_one);
-            }
-        }
-
-        if(choice_two == 'c') { // Изменить выбранную карту.
-            i = invalid_choice = 0; // Допустимый выбор.
-            while((i == pick) || (cards[i] == 'Q')) {  // Повторять в цикле,
-                // Пока не найдена другая карта
-                i++;
-            }
-            pick = i; // А затем изменить выбор.
-            printf("Your card pick has been changed to card %d\n", pick+1);
-        }
+    if (wager_two != -1) {
+      printf("and an additional %d credits from your second wager!\n",
+             wager_two);
+      player.credits -= wager_two;
     }
-
-    for(i=0; i < 3; i++) { // Раскрыть все карты.
-        if(ace == i) {
-            cards[i] = 'A';
-        } else {
-            cards[i] = 'Q';
-        }
-    }
-
+  }
+  return 0;
 }
 // ------------------------------------------------------------
 //

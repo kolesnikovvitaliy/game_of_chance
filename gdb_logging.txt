@@ -1,0 +1,73 @@
+Reading symbols from ./game_of_chance.out...done.
+Temporary breakpoint 1 at 0x401226: file main.c, line 5.
+Starting program: /home/localadmin/Desktops/Desktop1/PROJECTS/game_of_chance/game_of_chance.out 
+
+Temporary breakpoint 1, main () at main.c:5
+5	  game_of_chance();
+1	extern int game_of_chance();
+2	// Запуск игры.
+3	// ########################
+4	int main() {
+5	  game_of_chance();
+6	  return 0;
+7	}
+8	// #######################
+8	#include <unistd.h>
+9	
+10	// Глобальные переменные
+11	struct user player; // Структура с данными игрока
+12	// ############################################################
+13	int game_of_chance() {
+14	  int choice, last_game;
+15	
+16	  srand(time(0)); // Начальное значение генератора
+17	  // случайных чисел определяются текущим временем.
+Starting program: /home/localadmin/Desktops/Desktop1/PROJECTS/game_of_chance/game_of_chance.out 
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7e4668c in _IO_vfscanf_internal (s=<optimized out>, format=<optimized out>, argptr=argptr@entry=0x7fffffffdd00, errp=errp@entry=0x0) at vfscanf.c:1895
+1895	vfscanf.c: Нет такого файла или каталога.
+#0  0x00007ffff7e4668c in _IO_vfscanf_internal (s=<optimized out>, format=<optimized out>, argptr=argptr@entry=0x7fffffffdd00, errp=errp@entry=0x0) at vfscanf.c:1895
+#1  0x00007ffff7e51a88 in __isoc99_scanf (format=<optimized out>) at isoc99_scanf.c:37
+#2  0x0000000000401391 in game_of_chance () at src/game_of_chance.c:36
+#3  0x0000000000401230 in main () at main.c:5
+8	#include <unistd.h>
+9	
+10	// Глобальные переменные
+11	struct user player; // Структура с данными игрока
+12	// ############################################################
+13	int game_of_chance() {
+14	  int choice, last_game;
+15	
+16	  srand(time(0)); // Начальное значение генератора
+17	  // случайных чисел определяются текущим временем.
+8	#include <unistd.h>
+9	
+10	// Глобальные переменные
+11	struct user player; // Структура с данными игрока
+12	// ############################################################
+13	int game_of_chance() {
+14	  int choice, last_game;
+15	
+16	  srand(time(0)); // Начальное значение генератора
+17	  // случайных чисел определяются текущим временем.
+18	
+19	  if (get_player_data() == -1) { // Попытка прочитать данные игрока из файла.
+20	    register_new_player(); // Если данных нет,
+21	    // зарегистрировать нового игрока.
+22	  }
+23	
+24	  while (choice != 7) {
+25	    printf("-=[ Game of Chance Menu ]=-\n");
+26	    printf("1 - Play the Pick a Number game\n");
+27	    printf("2 - Play the No Match Dealer game\n");
+28	    printf("3 - Play the Find the Ace game\n");
+29	    printf("4 - View current high score\n");
+30	    printf("5 - Change your user name\n");
+31	    printf("6 - Reset your account at 100 credits\n");
+32	    printf("7 - Quit\n");
+33	    printf("[Name: %s]\n", player.name);
+34	    printf("[You have %u credits] -> ", player.credits);
+35	
+36	    scanf("%d", choice);
+37	
