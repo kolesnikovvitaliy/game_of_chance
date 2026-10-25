@@ -261,7 +261,7 @@ int take_wager(int available_credits, int previous_wager) {
            available_credits);
     return -1;
   }
-  return -1;
+  return wager;
 }
 // ------------------------------------------------------------
 // В этой функции есть цикл, позволяющий снова сыграть
@@ -346,9 +346,9 @@ int dealer_no_match() {
 
   while (wager == -1) {
     wager = take_wager(player.credits, 0);
-    printf("\t\t::: Dealing out 16 random numbers :::\n");
   }
 
+  printf("\t\t::: Dealing out 16 random numbers :::\n");
   for (i = 0; i < 16; i++) {
     numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
     printf("%2d\t", numbers[i]);
@@ -407,7 +407,7 @@ int find_the_ace() {
   print_cards("Dealing cards", cards, -1);
   pick = -1;
   while ((pick < 1) || (pick > 3)) {
-    printf("Select a card: 1, 2 or 3");
+    printf("Select a card: 1, 2 or 3: ");
     scanf("%d", &pick);
   }
 
