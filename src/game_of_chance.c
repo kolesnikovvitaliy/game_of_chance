@@ -1,4 +1,5 @@
 #include "my_lib.h"
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,229 +11,246 @@
 // Глобальные переменные
 struct user player; // Структура с данными игрока
 // ############################################################
-int game_of_chance() {
-  int choice, last_game;
+int
+game_of_chance()
+{
+    int choice, last_game;
 
-  srand(time(0)); // Начальное значение генератора
-  // случайных чисел определяются текущим временем.
+    srand(time(0)); // Начальное значение генератора
+    // случайных чисел определяются текущим временем.
 
-  if (get_player_data() == -1) { // Попытка прочитать данные игрока из файла.
-    register_new_player(); // Если данных нет,
-    // зарегистрировать нового игрока.
-  }
-
-  while (choice != 7) {
-    printf("-=[ Game of Chance Menu ]=-\n");
-    printf("1 - Play the Pick a Number game\n");
-    printf("2 - Play the No Match Dealer game\n");
-    printf("3 - Play the Find the Ace game\n");
-    printf("4 - View current high score\n");
-    printf("5 - Change your user name\n");
-    printf("6 - Reset your account at 100 credits\n");
-    printf("7 - Quit\n");
-    printf("[Name: %s]\n", player.name);
-    printf("[You have %u credits] -> ", player.credits);
-
-    scanf("%d", &choice);
-
-    if ((choice < 1) || (choice > 7)) {
-      printf("\n[!!] The number %d is an invalid selection.\n\n", choice);
-    } else if (choice < 4) { // Если была выбрана та или иная игра.
-      if (choice != last_game) { // Если указатель на функцию не
-                                 // определен,
-        if (choice == 1) { // задать указатель на выбранную игру
-          player.current_game = pick_a_number;
-        } else if (choice == 2) {
-          player.current_game = dealer_no_match;
-        } else {
-          player.current_game = find_the_ace;
-        }
-        last_game = choice; // и запомнить последнюю выбранную игру.
-      }
-      play_the_game(); // Сыграть в игру.
-    } else if (choice == 4) {
-      show_highscore();
-    } else if (choice == 5) {
-      printf("\nChange user name\n");
-      printf("Enter your new name: ");
-      input_name();
-      printf("Your name has been changed.\n\n");
-    } else if (choice == 6) {
-      printf("\nYour account has been reset with 100 credits.\n\n");
-      player.credits = 100;
+    if (get_player_data() == -1) { // Попытка прочитать данные игрока из файла.
+        register_new_player(); // Если данных нет,
+        // зарегистрировать нового игрока.
     }
-  }
-  update_player_data();
-  printf("\nThanks for playing! Bye.\n");
+
+    while (choice != 7) {
+        printf("-=[ Game of Chance Menu ]=-\n");
+        printf("1 - Play the Pick a Number game\n");
+        printf("2 - Play the No Match Dealer game\n");
+        printf("3 - Play the Find the Ace game\n");
+        printf("4 - View current high score\n");
+        printf("5 - Change your user name\n");
+        printf("6 - Reset your account at 100 credits\n");
+        printf("7 - Quit\n");
+        printf("[Name: %s]\n", player.name);
+        printf("[You have %u credits] -> ", player.credits);
+
+        scanf("%d", &choice);
+
+        if ((choice < 1) || (choice > 7)) {
+            printf("\n[!!] The number %d is an invalid selection.\n\n",
+                   choice);
+        } else if (choice < 4) { // Если была выбрана та или иная игра.
+            if (choice != last_game) { // Если указатель на функцию не
+                                       // определен,
+                if (choice == 1) { // задать указатель на выбранную игру
+                    player.current_game = pick_a_number;
+                } else if (choice == 2) {
+                    player.current_game = dealer_no_match;
+                } else {
+                    player.current_game = find_the_ace;
+                }
+                last_game = choice; // и запомнить последнюю выбранную игру.
+            }
+            play_the_game(); // Сыграть в игру.
+        } else if (choice == 4) {
+            show_highscore();
+        } else if (choice == 5) {
+            printf("\nChange user name\n");
+            printf("Enter your new name: ");
+            input_name();
+            printf("Your name has been changed.\n\n");
+        } else if (choice == 6) {
+            printf("\nYour account has been reset with 100 credits.\n\n");
+            player.credits = 100;
+        }
+    }
+    update_player_data();
+    printf("\nThanks for playing! Bye.\n");
 }
 // ############################################################
 // ------------------------------------------------------------
 // Эта функция читает данные игрока для текущего UID
 // из файла. Она возвращает -1, если не может найти данные игррока
 // для текущего UID.
-int get_player_data() {
-  int fd, uid, read_bytes;
-  struct user entry;
+int
+get_player_data()
+{
+    int         fd, uid, read_bytes;
+    struct user entry;
 
-  uid = getuid();
-  fd = open(DATAFILE, O_RDONLY);
+    uid = getuid();
+    fd  = open(DATAFILE, O_RDONLY);
 
-  if (fd == -1) { // Не получается открыть файл; возможно он не существует.
-    return -1;
-  }
+    if (fd == -1) { // Не получается открыть файл; возможно он не существует.
+        return -1;
+    }
 
-  // Прочитать первый блок.
-  read_bytes = read(fd, &entry, sizeof(struct user));
-  while (entry.uid != uid && read_bytes > 0) {
-    // Повторть в цикле до обнаружения нужного uid.
+    // Прочитать первый блок.
     read_bytes = read(fd, &entry, sizeof(struct user));
-    // Продолжать чтение.
-  }
+    while (entry.uid != uid && read_bytes > 0) {
+        // Повторть в цикле до обнаружения нужного uid.
+        read_bytes = read(fd, &entry, sizeof(struct user));
+        // Продолжать чтение.
+    }
 
-  close(fd);
+    close(fd);
 
-  if (read_bytes < sizeof(struct user)) {
-    // Это означает что достигнут конец файла.
-    return -1;
-  } else {
-    player = entry; // Копировать считанный объект в структуру player.
-    return 1;       // Если успех, вурнуть 1.
-  }
+    if (read_bytes < sizeof(struct user)) {
+        // Это означает что достигнут конец файла.
+        return -1;
+    } else {
+        player = entry; // Копировать считанный объект в структуру player.
+        return 1;       // Если успех, вурнуть 1.
+    }
 }
 // ------------------------------------------------------------
 // Функция регистрации нового пользователя.
 // Создает учетную запись для нового игрока и дописывает ее в файл.
-void register_new_player() {
-  int fd;
+void
+register_new_player()
+{
+    int fd;
 
-  printf("-=-={ New Player Registration }=-=-\n");
-  printf("Enter your name: ");
+    printf("-=-={ New Player Registration }=-=-\n");
+    printf("Enter your name: ");
 
-  input_name();
+    input_name();
 
-  player.uid = getuid();
-  player.highscore = player.credits = 100;
+    player.uid       = getuid();
+    player.highscore = player.credits = 100;
 
-  fd = open(DATAFILE, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+    fd = open(DATAFILE, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 
-  if (fd == -1) {
-    fatal("in register_new_player() while opening file");
-  }
+    if (fd == -1) {
+        fatal("in register_new_player() while opening file");
+    }
 
-  write(fd, &player, sizeof(struct user));
+    write(fd, &player, sizeof(struct user));
 
-  close(fd);
+    close(fd);
 
-  printf("\nWelcom to the Game of Chance %s.\n", player.name);
-  printf("You have been given %u credits.\n", player.credits);
+    printf("\nWelcom to the Game of Chance %s.\n", player.name);
+    printf("You have been given %u credits.\n", player.credits);
 }
 // ------------------------------------------------------------
 // Эта функция записывает в файл сведения о текущем игроке.
 // В основном служит для обновления результатов после завершения игры.
-void update_player_data() {
-  int fd, i, read_uid;
-  char burned_byte;
+void
+update_player_data()
+{
+    int  fd, i, read_uid;
+    char burned_byte;
 
-  fd = open(DATAFILE, O_RDWR);
+    fd = open(DATAFILE, O_RDWR);
 
-  if (fd == -1) { // Если не удалось открыть файл, есть серьезные проблемы.
-    fatal("in update_player_data() while opening file");
-  }
-
-  read(fd, &read_uid, 4); // Прочитать UID из первой структуры.
-
-  while (read_uid != player.uid) { // Повторять, пока не отыщется нужный uid.
-    for (i = 0; i < sizeof(struct user) - 4; i++) { // Прочитать остаток
-      read(fd, &burned_byte, 1);                    // структуры
+    if (fd == -1) { // Если не удалось открыть файл, есть серьезные проблемы.
+        fatal("in update_player_data() while opening file");
     }
-    read(fd, &read_uid, 4); // Прочитать uid из следующей структуры.
-  }
 
-  write(fd, &(player.credits), 4); // Обновить результаты.
-  write(fd, &(player.highscore), 4); // Обновить лучший результат.
-  write(fd, &(player.name), 100); // Обновить имя.
-  close(fd);
+    read(fd, &read_uid, 4); // Прочитать UID из первой структуры.
+
+    while (read_uid != player.uid) { // Повторять, пока не отыщется нужный uid.
+        for (i = 0; i < sizeof(struct user) - 4; i++) { // Прочитать остаток
+            read(fd, &burned_byte, 1);                  // структуры
+        }
+        read(fd, &read_uid, 4); // Прочитать uid из следующей структуры.
+    }
+
+    write(fd, &(player.credits), 4); // Обновить результаты.
+    write(fd, &(player.highscore), 4); // Обновить лучший результат.
+    write(fd, &(player.name), 100); // Обновить имя.
+    close(fd);
 }
 // ------------------------------------------------------------
 // Эта функция выводит текущий лучший результат
 //и имя лучшего игрока.
-void show_highscore() {
-  unsigned int top_score = 0;
-  char top_name[100];
-  struct user entry;
-  int fd;
+void
+show_highscore()
+{
+    unsigned int top_score = 0;
+    char         top_name[100];
+    struct user  entry;
+    int          fd;
 
-  printf("\n====================| HIGH SCORE |====================\n");
+    printf("\n====================| HIGH SCORE |====================\n");
 
-  fd = open(DATAFILE, O_RDONLY);
+    fd = open(DATAFILE, O_RDONLY);
 
-  if (fd == -1) {
-    fatal("in show_highscore() while opening file");
-  }
-  while (read(fd, &entry, sizeof(struct user)) > 0) { // Повторять, пока
-                                                      // не закончится файл.
-    if (entry.highscore > top_score) { // Если есть лучший результат,
-      top_score = entry.highscore; // записать его в top_score
-      strcpy(top_name, entry.name); // и имя пользователя в top_name.
+    if (fd == -1) {
+        fatal("in show_highscore() while opening file");
     }
-  }
+    while (read(fd, &entry, sizeof(struct user)) > 0) { // Повторять, пока
+                                                        // не закончится файл.
+        if (entry.highscore > top_score) { // Если есть лучший результат,
+            top_score = entry.highscore; // записать его в top_score
+            strcpy(top_name, entry.name); // и имя пользователя в top_name.
+        }
+    }
 
-  close(fd);
+    close(fd);
 
-  if (top_score > player.highscore) {
-    printf("%s has the high score of %u\n", top_name, top_score);
-  } else {
-    printf("You currently have the high score of %u credits!\n",
-           player.highscore);
-  }
+    if (top_score > player.highscore) {
+        printf("%s has the high score of %u\n", top_name, top_score);
+    } else {
+        printf("You currently have the high score of %u credits!\n",
+               player.highscore);
+    }
 
-  printf("=======================================================\n\n");
+    printf("=======================================================\n\n");
 }
 // ------------------------------------------------------------
 // Эта функция присуждает джекпот для игры Pick a Number (выбери число).
-void jackpot() {
-  printf("*+*+*+*+*+* JACKPOT *+*+*+*+*+*\n");
-  printf("You have won the jackpot of 100 credits!\n");
-  player.credits += 100;
+void
+jackpot()
+{
+    printf("*+*+*+*+*+* JACKPOT *+*+*+*+*+*\n");
+    printf("You have won the jackpot of 100 credits!\n");
+    player.credits += 100;
 }
 // ------------------------------------------------------------
 // Эта функция вводит имя игрока, поскольку
 // scanf("%s", &whaterver) прекратит ввод на первом пробеле.
-void input_name() {
-  char *name_ptr, input_char = '\n';
+void
+input_name()
+{
+    char *name_ptr, input_char = '\n';
 
-  while (input_char == '\n') { // Сбросить оставшиеся
-    scanf("%c", &input_char);  // символы перевода строки.
-  }
+    while (input_char == '\n') { // Сбросить оставшиеся
+        scanf("%c", &input_char); // символы перевода строки.
+    }
 
-  name_ptr = (char *)&(player.name); // name_ptr = адрес имени игрока.
-  while (input_char != '\n') { // Повторять до перевода строки.
-    *name_ptr = input_char; // Пометить введенный символ в поле name.
-    scanf("%c", &input_char); // Получить следующий символ.
-    name_ptr++;               // Увеличить указатель.
-  }
-  *name_ptr = 0; // Завершить строку.
+    name_ptr = (char *) &(player.name); // name_ptr = адрес имени игрока.
+    while (input_char != '\n') { // Повторять до перевода строки.
+        *name_ptr = input_char; // Пометить введенный символ в поле name.
+        scanf("%c", &input_char); // Получить следующий символ.
+        name_ptr++;               // Увеличить указатель.
+    }
+    *name_ptr = 0; // Завершить строку.
 }
 // ------------------------------------------------------------
 // Эта функция выводит три карты в игре Find the Ace.
 // Она принимает сообщение, которое нужно вывести, указатель на масив карт
 // и карту, которую пользователь выбрал для ввода.
 // Если user_pick равен -1, отображаются номера выбора.
-void print_cards(char *message, char *cards, int user_pick) {
-  int i;
+void
+print_cards(char *message, char *cards, int user_pick)
+{
+    int i;
 
-  printf("\n\t*** %s ***\n", message);
-  printf(" \t._.\t._.\t._.\n");
-  printf("Cards:\t|%c|\t|%c|\t|%c|\n\t", cards[0], cards[1], cards[2]);
+    printf("\n\t*** %s ***\n", message);
+    printf(" \t._.\t._.\t._.\n");
+    printf("Cards:\t|%c|\t|%c|\t|%c|\n\t", cards[0], cards[1], cards[2]);
 
-  if (user_pick == -1) {
-    printf(" 1 \t 2 \t 3\n");
-  } else {
-    for (i = 0; i < user_pick; i++) {
-      printf("\t");
+    if (user_pick == -1) {
+        printf(" 1 \t 2 \t 3\n");
+    } else {
+        for (i = 0; i < user_pick; i++) {
+            printf("\t");
+        }
+        printf(" ^-- your pick\n");
     }
-    printf(" ^-- your pick\n");
-  }
 }
 // ------------------------------------------------------------
 // Эта функция вводит ставки для игр No Match Dealer
@@ -241,244 +259,256 @@ void print_cards(char *message, char *cards, int user_pick) {
 // второй ставки в игре Find the Ace.
 // Функция возвращает -1,  если ставка слишком велика или слишком мала,
 // и размер ставки в противном случае.
-int take_wager(int available_credits, int previous_wager) {
-  int wager, total_wager;
+int
+take_wager(int available_credits, int previous_wager)
+{
+    int wager, total_wager;
 
-  printf("How many of your %d credits would you like to wager? ",
-         available_credits);
-
-  scanf("%d", &wager);
-
-  if (wager < 1) { // Проверить что ставка больше 0.
-    printf("Nice try, but you must wager a positive number!\n");
-    return -1;
-  }
-
-  total_wager = previous_wager + wager;
-  if (total_wager > available_credits) {
-    printf("Your total wager of %d is more than you have!\n", total_wager);
-    printf("You only have %d available_credits, try again.\n",
+    printf("How many of your %d credits would you like to wager? ",
            available_credits);
-    return -1;
-  }
-  return wager;
+
+    scanf("%d", &wager);
+
+    if (wager < 1) { // Проверить что ставка больше 0.
+        printf("Nice try, but you must wager a positive number!\n");
+        return -1;
+    }
+
+    total_wager = previous_wager + wager;
+    if (total_wager > available_credits) {
+        printf("Your total wager of %d is more than you have!\n", total_wager);
+        printf("You only have %d available_credits, try again.\n",
+               available_credits);
+        return -1;
+    }
+    return wager;
 }
 // ------------------------------------------------------------
 // В этой функции есть цикл, позволяющий снова сыграть
 // текущую игру. Он также записывает в файл новую сумму очков
 // после каждой сыгранной игры.
-void play_the_game() {
-  int play_again = 1;
-  int (*game)();
-  char selection;
+void
+play_the_game()
+{
+    int play_again = 1;
+    int (*game)();
+    char selection;
 
-  while (play_again) {
-    printf("\n[DEBUG] current_game pointer @ 0x%08x\n", player.current_game);
-    if (player.current_game() != -1) { // Если игра сыгранна успешно
-      if (player.credits > player.highscore) { // и установлен новый
-                                               // рекорд
-        player.highscore = player.credits; // обновить рекорд.
-      }
-      printf("\nYou now have %u credits\n", player.credits);
-      update_player_data(); // Записать новую сумму очков в файл.
+    while (play_again) {
+        printf("\n[DEBUG] current_game pointer @ 0x%08x\n",
+               player.current_game);
+        if (player.current_game() != -1) { // Если игра сыгранна успешно
+            if (player.credits > player.highscore) { // и установлен новый
+                                                     // рекорд
+                player.highscore = player.credits; // обновить рекорд.
+            }
+            printf("\nYou now have %u credits\n", player.credits);
+            update_player_data(); // Записать новую сумму очков в файл.
 
-      printf("Would you like to play again? (y/n) ");
+            printf("Would you like to play again? (y/n) ");
 
-      selection = '\n';
-      while (selection == '\n') { // Сбросить лишние переводы строки.
-        scanf("%c", &selection);
-        if (selection == 'n') {
-          play_again = 0;
+            selection = '\n';
+            while (selection == '\n') { // Сбросить лишние переводы строки.
+                scanf("%c", &selection);
+                if (selection == 'n') {
+                    play_again = 0;
+                }
+            }
+        } else { // Это значит, что игра вернула ошибку,
+            play_again = 0; // поэтому вернуться в главное меню.
         }
-      }
-    } else { // Это значит, что игра вернула ошибку,
-      play_again = 0; // поэтому вернуться в главное меню.
     }
-  }
 }
 // ------------------------------------------------------------
 // Эта функция реализует игру PIck a Number.
 // Она возвращает -1, если у игрока недостачно очков.
-int pick_a_number() {
-  int pick, winning_number;
-  printf("\n####### Pick a Number ######\n");
-  printf("This game costs 10 credits to play. Simply pick a number\n");
-  printf("between 1 and 20, and if you pick the winning number, you\n");
-  printf("will win the jackpot of 100 credits!\n\n");
+int
+pick_a_number()
+{
+    int pick, winning_number;
+    printf("\n####### Pick a Number ######\n");
+    printf("This game costs 10 credits to play. Simply pick a number\n");
+    printf("between 1 and 20, and if you pick the winning number, you\n");
+    printf("will win the jackpot of 100 credits!\n\n");
 
-  winning_number = (rand() % 20) + 1; // Выбрать число от 1 до 20.
-  if (player.credits < 10) {
-    printf("You only have %d credits. That's not enough to play!\n\n",
-           player.credits);
-    return -1; // Недостаточно очков для игры
-  }
+    winning_number = (rand() % 20) + 1; // Выбрать число от 1 до 20.
+    if (player.credits < 10) {
+        printf("You only have %d credits. That's not enough to play!\n\n",
+               player.credits);
+        return -1; // Недостаточно очков для игры
+    }
 
-  player.credits -= 10; // Вычесть 10 очков.
+    player.credits -= 10; // Вычесть 10 очков.
 
-  printf("10 credits have been deducted from your account.\n");
-  printf("Pick a number between 1 and 20: ");
+    printf("10 credits have been deducted from your account.\n");
+    printf("Pick a number between 1 and 20: ");
 
-  scanf("%d", &pick);
-  printf("The winning number is %d\n", winning_number);
+    scanf("%d", &pick);
+    printf("The winning number is %d\n", winning_number);
 
-  if (pick == winning_number) {
-    jackpot();
-  } else {
-    printf("Sorry, you didn't win.\n");
-    return 0;
-  }
+    if (pick == winning_number) {
+        jackpot();
+    } else {
+        printf("Sorry, you didn't win.\n");
+        return 0;
+    }
 }
 // ------------------------------------------------------------
 // Это игра No Match Dealer.
 // Она возвращает -1, если у игрока 0 очков.
-int dealer_no_match() {
-  int i, j, numbers[16], wager = -1, match = -1;
+int
+dealer_no_match()
+{
+    int i, j, numbers[16], wager = -1, match = -1;
 
-  printf("\n::::::: No Match Dealer :::::::\n");
-  printf("In this game, you can wager up to all of your credits.\n");
-  printf("The dealer will deal out 16 random numbers between 0 and 99.\n");
-  printf("If there are no matches among them, you double yuor money!\n\n");
+    printf("\n::::::: No Match Dealer :::::::\n");
+    printf("In this game, you can wager up to all of your credits.\n");
+    printf("The dealer will deal out 16 random numbers between 0 and 99.\n");
+    printf("If there are no matches among them, you double yuor money!\n\n");
 
-  if (player.credits == 0) {
-    printf("You don't have any credits to wager!\n\n");
-    return -1;
-  }
-
-  while (wager == -1) {
-    wager = take_wager(player.credits, 0);
-  }
-
-  printf("\t\t::: Dealing out 16 random numbers :::\n");
-  for (i = 0; i < 16; i++) {
-    numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
-    printf("%2d\t", numbers[i]);
-    if (i % 8 == 7) { // С новой строки через каждые 8 чисел.
-      printf("\n");
+    if (player.credits == 0) {
+        printf("You don't have any credits to wager!\n\n");
+        return -1;
     }
-  }
 
-  for (i = 0; i < 15; i++) {
-    j = i + 1;
-    while (j < 16) {
-      if (numbers[i] == numbers[j]) {
-        match = numbers[i];
-      }
-      j++;
+    while (wager == -1) {
+        wager = take_wager(player.credits, 0);
     }
-  }
 
-  if (match != -1) {
-    printf("The dealer matched the number %d!\n", match);
-    printf("You lose %d credits.\n", wager);
-    player.credits -= wager;
-  } else {
-    printf("There were no matches! You win %d credits!\n", wager);
-    player.credits += wager;
-  }
-  return 0;
+    printf("\t\t::: Dealing out 16 random numbers :::\n");
+    for (i = 0; i < 16; i++) {
+        numbers[i] = rand() % 100; // Выбрать число от 0 до 99.
+        printf("%2d\t", numbers[i]);
+        if (i % 8 == 7) { // С новой строки через каждые 8 чисел.
+            printf("\n");
+        }
+    }
+
+    for (i = 0; i < 15; i++) {
+        j = i + 1;
+        while (j < 16) {
+            if (numbers[i] == numbers[j]) {
+                match = numbers[i];
+            }
+            j++;
+        }
+    }
+
+    if (match != -1) {
+        printf("The dealer matched the number %d!\n", match);
+        printf("You lose %d credits.\n", wager);
+        player.credits -= wager;
+    } else {
+        printf("There were no matches! You win %d credits!\n", wager);
+        player.credits += wager;
+    }
+    return 0;
 }
 // ------------------------------------------------------------
 // Это игра Find the Ace.
 // Она возвращает -1, если у игрока 0 очков.
-int find_the_ace() {
-  int i, ace, total_wager;
-  int invalid_choice, pick = -1, wager_one = -1, wager_two = -1;
-  char choice_two, cards[3] = {'X', 'X', 'X'};
+int
+find_the_ace()
+{
+    int  i, ace, total_wager;
+    int  invalid_choice, pick = -1, wager_one = -1, wager_two = -1;
+    char choice_two, cards[3] = { 'X', 'X', 'X' };
 
-  ace = rand() % 3; // Выбрать для туза случайную позицию.
-  printf("******* Fing the Ace *******\n");
-  printf("In this game, you can wager up to all of your credits.\n");
-  printf("Three cards will be dealt out, two queens and one ace.\n");
-  printf("If you find the ace, you will win uoyr wager.\n");
-  printf("After choosing a card, one of the queens will be revealed.\n");
-  printf("At this piont, you may either select a different card or\n");
-  printf("increase your wager.\n\n");
+    ace = rand() % 3; // Выбрать для туза случайную позицию.
+    printf("******* Fing the Ace *******\n");
+    printf("In this game, you can wager up to all of your credits.\n");
+    printf("Three cards will be dealt out, two queens and one ace.\n");
+    printf("If you find the ace, you will win uoyr wager.\n");
+    printf("After choosing a card, one of the queens will be revealed.\n");
+    printf("At this piont, you may either select a different card or\n");
+    printf("increase your wager.\n\n");
 
-  if (player.credits == 0) {
-    printf("You don't have any credits to wager");
-    return -1;
-  }
-
-  while (wager_one == -1) { // Выполнить цикл пока не будет
-                            // сделана допустимая ставка.
-    wager_one = take_wager(player.credits, 0);
-  }
-
-  print_cards("Dealing cards", cards, -1);
-  pick = -1;
-  while ((pick < 1) || (pick > 3)) {
-    printf("Select a card: 1, 2 or 3: ");
-    scanf("%d", &pick);
-  }
-
-  pick--; // Корркстировать выбор, потому что нумерация карт начинается с 0.
-  i = 0;
-  while ((i == ace) || (i == pick)) { // Выполнять цикл, пока
-    i++; // не будет найдена дама для открытия.
-  }
-
-  cards[i] = 'Q';
-  print_cards("Revealing a queen", cards, pick);
-
-  invalid_choice = 1;
-  while (invalid_choice) { // Выполнять цикл, пока не будет сделан
-                           // допустимый выбор.
-    printf(
-        "Would you like to:\n[c]hange your pick\tor\t[i]ncrease you wager?\n");
-    printf("Select c or i: ");
-
-    choice_two = '\n';
-    while (choice_two == '\n') { // Сбросить лишние переводы строки.
-      scanf("%c", &choice_two);
+    if (player.credits == 0) {
+        printf("You don't have any credits to wager");
+        return -1;
     }
 
-    if (choice_two == 'i') {    // УвGеличить ставку.
-      invalid_choice = 0;       // Это допустимый выбор.
-      while (wager_two == -1) { // Повторять пока не сделана
-        // вторая допустимая ставка
-        wager_two = take_wager(player.credits, wager_one);
-      }
+    while (wager_one == -1) { // Выполнить цикл пока не будет
+                              // сделана допустимая ставка.
+        wager_one = take_wager(player.credits, 0);
     }
 
-    if (choice_two == 'c') {  // Изменить выбранную карту.
-      i = invalid_choice = 0; // Допустимый выбор.
-      while ((i == pick) || (cards[i] == 'Q')) { // Повторять в цикле,
-        // Пока не найдена другая карта
-        i++;
-      }
-      pick = i; // А затем изменить выбор.
-      printf("Your card pick has been changed to card %d\n", pick + 1);
+    print_cards("Dealing cards", cards, -1);
+    pick = -1;
+    while ((pick < 1) || (pick > 3)) {
+        printf("Select a card: 1, 2 or 3: ");
+        scanf("%d", &pick);
     }
-  }
 
-  for (i = 0; i < 3; i++) { // Раскрыть все карты.
-    if (ace == i) {
-      cards[i] = 'A';
-    } else {
-      cards[i] = 'Q';
+    pick--; // Корркстировать выбор, потому что нумерация карт начинается с 0.
+    i = 0;
+    while ((i == ace) || (i == pick)) { // Выполнять цикл, пока
+        i++; // не будет найдена дама для открытия.
     }
-  }
 
-  print_cards("End result", cards, pick);
+    cards[i] = 'Q';
+    print_cards("Revealing a queen", cards, pick);
 
-  if (pick == ace) { // Обработка выигрыша.
-    printf("You have won %d credits from your first wager\n", wager_one);
-    player.credits += wager_one;
-  }
+    invalid_choice = 1;
+    while (invalid_choice) { // Выполнять цикл, пока не будет сделан
+                             // допустимый выбор.
+        printf("Would you like to:\n[c]hange your pick\tor\t[i]ncrease you "
+               "wager?\n");
+        printf("Select c or i: ");
 
-  if (wager_two != -1) {
-    printf("and an additional %d credits from your second wager!\n", wager_two);
-    player.credits += wager_two;
-  } else { // Обработка проигрыша.
-    printf("You have lost %d credits from your first wager\n, wager_one");
-    player.credits -= wager_one;
+        choice_two = '\n';
+        while (choice_two == '\n') { // Сбросить лишние переводы строки.
+            scanf("%c", &choice_two);
+        }
+
+        if (choice_two == 'i') { // УвGеличить ставку.
+            invalid_choice = 0;  // Это допустимый выбор.
+            while (wager_two == -1) { // Повторять пока не сделана
+                // вторая допустимая ставка
+                wager_two = take_wager(player.credits, wager_one);
+            }
+        }
+
+        if (choice_two == 'c') { // Изменить выбранную карту.
+            i = invalid_choice = 0; // Допустимый выбор.
+            while ((i == pick) || (cards[i] == 'Q')) { // Повторять в цикле,
+                // Пока не найдена другая карта
+                i++;
+            }
+            pick = i; // А затем изменить выбор.
+            printf("Your card pick has been changed to card %d\n", pick + 1);
+        }
+    }
+
+    for (i = 0; i < 3; i++) { // Раскрыть все карты.
+        if (ace == i) {
+            cards[i] = 'A';
+        } else {
+            cards[i] = 'Q';
+        }
+    }
+
+    print_cards("End result", cards, pick);
+
+    if (pick == ace) { // Обработка выигрыша.
+        printf("You have won %d credits from your first wager\n", wager_one);
+        player.credits += wager_one;
+    }
 
     if (wager_two != -1) {
-      printf("and an additional %d credits from your second wager!\n",
-             wager_two);
-      player.credits -= wager_two;
+        printf("and an additional %d credits from your second wager!\n",
+               wager_two);
+        player.credits += wager_two;
+    } else { // Обработка проигрыша.
+        printf("You have lost %d credits from your first wager\n, wager_one");
+        player.credits -= wager_one;
+
+        if (wager_two != -1) {
+            printf("and an additional %d credits from your second wager!\n",
+                   wager_two);
+            player.credits -= wager_two;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 //------------------------------------------------------------------------------------------------
